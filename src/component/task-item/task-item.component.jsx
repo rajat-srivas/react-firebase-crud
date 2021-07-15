@@ -4,13 +4,9 @@ import { updateTaskInFirebase } from '../../firebase-service.js'
 
 const TaskItem = ({ id, title, description, updatedAt, completed, onDelete }) => (
     <article className="task-item">
-
-
-
         <span className=
             {`${!completed ? 'progress' : 'completed'} status-label`}>
             {completed ? 'Completed' : 'InProgress'}</span>
-
 
         <h2>{title}</h2>
         <h4>{description}</h4>

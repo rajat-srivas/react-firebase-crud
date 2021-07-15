@@ -1,0 +1,40 @@
+.navbar {
+  max-height: 60px;
+  width: 100%;
+  background-color: #ffa000;
+
+  .navbar-item {
+    margin: 0 auto;
+    width: 90%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    overflow-x: hidden;
+  }
+
+  &__logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: whitesmoke;
+  }
+
+  .content-btn {
+    justify-self: flex-end;
+  }
+}
+
+.signout {
+  width: 100px;
+  cursor: pointer;
+  background-color: white;
+  border-radius: 5px;
+  height: 28px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: black;
+}

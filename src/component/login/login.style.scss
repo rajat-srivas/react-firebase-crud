@@ -1,0 +1,18 @@
+.google {
+  width: 200px;
+  cursor: pointer;
+  background-color: white;
+  border-radius: 5px;
+  display: flex;
+  height: 15px;
+  justify-content: space-around;
+  padding: 10px;
+  align-items: center;
+  img {
+    width: 25px;
+    height: 25px;
+  }
+  span {
+    font-weight: bold;
+  }
+}

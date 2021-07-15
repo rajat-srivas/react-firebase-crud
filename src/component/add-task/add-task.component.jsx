@@ -5,8 +5,7 @@ class AddTask extends React.Component {
     constructor() {
         super();
         this.state = {
-            title: '',
-            description: ''
+            title: ''
         }
     }
 
@@ -19,22 +18,20 @@ class AddTask extends React.Component {
         event.preventDefault();
 
         const { onCreate } = this.props;
-        const { title, description } = this.state;
+        const { title } = this.state;
 
         const task = {
             title,
-            description,
-            completed: false,
             updatedAt: new Date().toLocaleDateString()
         }
 
         onCreate(task);
 
-        this.setState({ title: '', description: '' });
+        this.setState({ title: '' });
     };
 
     render() {
-        const { title, description } = this.state;
+        const { title } = this.state;
         return (
             <div className="task-create">
                 <form onSubmit={this.handleSubmit} className="add-task">
@@ -43,13 +40,6 @@ class AddTask extends React.Component {
                         name="title"
                         placeholder="Title"
                         value={title}
-                        onChange={this.handleChange}
-                    />
-                    <input
-                        type="text"
-                        name="description"
-                        placeholder="Task Description"
-                        value={description}
                         onChange={this.handleChange}
                     />
                     <input disabled={!title.length > 0} className="create" type="submit" value="Create Task" />

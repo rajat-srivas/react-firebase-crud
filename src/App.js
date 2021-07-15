@@ -2,18 +2,23 @@ import React from 'react';
 import './App.scss';
 import AddTask from './component/add-task/add-task.component';
 import Tasks from './component/tasks/tasks.component';
-import { firestore } from './firebase-util';
-import { createTaskInFirebase, deleteTaskFromFirebase } from './firebase-service';
+import { firestore, auth } from './firebase-util';
+import { createTaskInFirebase, deleteTaskFromFirebase, createUserProfileInFirebase } from './firebase-service';
+import Navbar from './component/navbar/navbar-component';
+import Insta from './component/insta/insta.component';
+
 
 class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      tasks: []
+      tasks: [],
+      currentUser: null
     }
   }
 
-  unsubscribe = null;
+  unsubscribeFromFirestore = null;
+  unsubscribeAuth = null;
 
   handleDelete = id => {
     deleteTaskFromFirebase(id);
@@ -65,28 +70,37 @@ class App extends React.Component {
 
     //Subscribing => Update our UI when the database changes, i.e. no need to refersh the pages
     //additional is to unsubsctibe
-    this.unsubscribe = firestore.collection('tasks').onSnapshot(snapshot => {
+    this.unsubscribeFromFirestore = firestore.collection('tasks').onSnapshot(snapshot => {
       const taskFromDb = snapshot.docs.map(doc => { return { id: doc.id, ...doc.data() } });
       this.setState({ tasks: taskFromDb });
     });
 
+    this.unsubscribeAuth = auth.onAuthStateChanged(async user => {
+      if (user) {
+        const userRef = await createUserProfileInFirebase(user);
+        userRef.onSnapshot(async snapshot => {
+          this.setState({ currentUser: { id: snapshot.id, ...snapshot.data() } })
+        })
+      }
+      else {
+        this.setState({ currentUser: null })
+      }
+    })
+
   }
 
   componentWillUnmount = () => {
-    this.unsubscribe();
+    this.unsubscribeFromFirestore();
+    this.unsubscribeAuth();
   }
 
 
   render() {
+    const { currentUser } = this.state;
     return (
       <div className="App">
-        <div className="heading">
-          <span className='main'>Firebase Operations with React</span>
-          <span className='subheading'>Create, Read, Update, Delete & Subscribe  </span>
-        </div>
-
-        <AddTask onCreate={this.handleCreate} ></AddTask>
-        <Tasks onDelete={this.handleDelete} tasks={this.state.tasks} heading='All Tasks'></Tasks>
+        <Navbar currentUser={currentUser} ></Navbar>
+        <Insta currentUser={currentUser} ></Insta>
       </div >
     );
   }
@@ -94,3 +108,7 @@ class App extends React.Component {
 
 
 export default App;
+
+
+//  <AddTask onCreate={this.handleCreate} ></AddTask>
+// <Tasks onDelete={this.handleDelete} tasks={this.state.tasks} heading='All Tasks'></Tasks>  
