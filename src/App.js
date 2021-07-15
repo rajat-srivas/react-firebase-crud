@@ -1,9 +1,7 @@
 import React from 'react';
 import './App.scss';
-import AddTask from './component/add-task/add-task.component';
-import Tasks from './component/tasks/tasks.component';
 import { firestore, auth } from './firebase-util';
-import { createTaskInFirebase, deleteTaskFromFirebase, createUserProfileInFirebase } from './firebase-service';
+import { createUserProfileInFirebase } from './firebase-service';
 import Navbar from './component/navbar/navbar-component';
 import Insta from './component/insta/insta.component';
 
@@ -12,7 +10,6 @@ class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      tasks: [],
       currentUser: null
     }
   }
@@ -20,15 +17,6 @@ class App extends React.Component {
   unsubscribeFromFirestore = null;
   unsubscribeAuth = null;
 
-  handleDelete = id => {
-    deleteTaskFromFirebase(id);
-  }
-
-  handleCreate = task => {
-    const { tasks } = this.state;
-    createTaskInFirebase(task);
-    //this.setState({ tasks: [task, ...tasks] });
-  };
 
   componentDidMount = async () => {
 
@@ -70,10 +58,10 @@ class App extends React.Component {
 
     //Subscribing => Update our UI when the database changes, i.e. no need to refersh the pages
     //additional is to unsubsctibe
-    this.unsubscribeFromFirestore = firestore.collection('tasks').onSnapshot(snapshot => {
-      const taskFromDb = snapshot.docs.map(doc => { return { id: doc.id, ...doc.data() } });
-      this.setState({ tasks: taskFromDb });
-    });
+    // this.unsubscribeFromFirestore = firestore.collection('tasks').onSnapshot(snapshot => {
+    //   const taskFromDb = snapshot.docs.map(doc => { return { id: doc.id, ...doc.data() } });
+    //   this.setState({ tasks: taskFromDb });
+    // });
 
     this.unsubscribeAuth = auth.onAuthStateChanged(async user => {
       if (user) {
@@ -108,7 +96,3 @@ class App extends React.Component {
 
 
 export default App;
-
-
-//  <AddTask onCreate={this.handleCreate} ></AddTask>
-// <Tasks onDelete={this.handleDelete} tasks={this.state.tasks} heading='All Tasks'></Tasks>  

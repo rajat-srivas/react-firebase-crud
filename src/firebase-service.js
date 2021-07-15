@@ -1,44 +1,31 @@
 import { firestore } from "./firebase-util";
-import firebase from 'firebase/app';
-import uuid from 'react-uuid'
+const defaultImage = '5bRbc5kDPeHssRyeCYVh';
 
 
-export const createTaskInFirebase = async task => {
-    const newDocRef = await firestore.collection('tasks').add(task);
-    const newDocSnapshot = await newDocRef.get();  //this is document snapshot
-    console.log(newDocSnapshot);
-    const newTask = { id: newDocSnapshot.id, ...newDocSnapshot.data() }
-    console.log(newTask);
+export const deleteCommentFromFirebase = async id => {
+    const commentRef = await firestore.collection('uploads').doc(defaultImage).collection('comments').doc(id);
+    console.log((commentRef));
+    commentRef.delete();
 }
 
-export const deleteTaskFromFirebase = async id => {
-    await firestore.doc(`tasks/${id}`).delete();
-}
 
-export const updateTaskInFirebase = async (id, completed) => {
-    const taskRef = firestore.doc(`tasks/${id}`);
-    taskRef.update({
-        completed: !completed,
-        updatedAt: new Date().toLocaleDateString()
+export const updateCommentInFirebase = async (id, text) => {
+    const commentRef = await firestore.collection('uploads').doc(defaultImage).collection('comments').doc(id);
+    commentRef.update({
+        text: text
     })
 }
 
 export const addNewComment = async (comment, author, imageId) => {
     const imageSnapshot = await firestore.doc(`uploads/${imageId}`);
     if (!imageSnapshot.empty) {
-        imageSnapshot.update({
-            comments: firebase.firestore.FieldValue.arrayUnion({ text: comment, author: author.email, id: uuid(), profilePic: author.photoURL })
-        })
+        const commentRef = await firestore.collection('uploads').doc(defaultImage).collection('comments');
+        commentRef.add({ text: comment, author: author.email, profilePic: author.photoURL, createdAt: new Date() })
     }
-
-}
-
-export const getAllComments = async (currentUser, imageId) => {
-    const uploadRef = await firestore.doc(`uploads/${imageId}`);
-    return uploadRef;
 }
 
 export const createUserProfileInFirebase = async (user) => {
+    console.log(user);
     if (!user) return;   //in case it is signout action, then the user object will be null
     const userRef = await firestore.doc(`users/${user.uid}`);
     const userSnaphot = userRef.get();
@@ -66,16 +53,4 @@ export const createUserProfileInFirebase = async (user) => {
     return userRef;
 }
 
-export const getPhotoUrlFromEmail = async (email) => {
-    const ref = await firestore.collection('users');
-    try {
-        const snapshot = await ref.where('email', '==', email).get();
-        snapshot.forEach(doc => {
-            return doc.get('photoURL');
-        })
-    }
-    catch (error) {
-        console.error(error);
-    }
-}
 

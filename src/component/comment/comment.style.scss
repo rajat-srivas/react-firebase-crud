@@ -1,0 +1,46 @@
+.comments {
+  width: 70%;
+  overflow-y: auto;
+  font-weight: bold;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  span {
+    margin-left: 8px;
+    width: 400px;
+  }
+
+  &:hover .showOnHover {
+    visibility: visible;
+  }
+}
+
+.showOnHover {
+  visibility: hidden;
+}
+
+.icons {
+  justify-self: stretch;
+  font-size: 15px;
+  padding: 2px;
+
+  .edit {
+    margin-right: 20px;
+    font-weight: bold;
+    color: gray;
+    cursor: pointer;
+  }
+
+  .delete {
+    color: red;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+}

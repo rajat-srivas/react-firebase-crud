@@ -1,9 +1,9 @@
 import React from 'react'
 import './insta.style.scss';
 import United from '../../united.jpg';
-import { addNewComment, getAllComments, getPhotoUrlFromEmail, getCommentsState } from '../../firebase-service.js';
-import { firestore, auth } from '../../firebase-util';
-import CommentItem from '../../comment/comment.component';
+import { addNewComment, updateCommentInFirebase, deleteCommentFromFirebase } from '../../firebase-service.js';
+import { firestore } from '../../firebase-util';
+import CommentItem from '../comment/comment.component';
 
 
 class Insta extends React.Component {
@@ -12,7 +12,9 @@ class Insta extends React.Component {
         super();
         this.state = {
             comment: '',
-            imageUpload: null
+            imageUpload: null,
+            isEdit: false,
+            itemToEdit: null
         }
     }
 
@@ -23,43 +25,40 @@ class Insta extends React.Component {
         this.setState({ [name]: value });
     };
 
+    deleteComment = id => {
+        deleteCommentFromFirebase(id);
+    }
+
+    editComment = (id, text) => {
+        console.log(text)
+        this.setState({ comment: text, isEdit: true, itemToEdit: id })
+    }
+
     createComment = () => {
         const { currentUser } = this.props;
-        addNewComment(this.state.comment, currentUser, '5bRbc5kDPeHssRyeCYVh');
+        if (this.state.itemToEdit && this.state.isEdit) {
+            updateCommentInFirebase(this.state.itemToEdit, this.state.comment);
+        }
+        else {
+            addNewComment(this.state.comment, currentUser, '5bRbc5kDPeHssRyeCYVh');
+        }
         this.setState({ comment: '' });
     }
 
-    // this.unsubscribeFromFirestore = firestore.collection('tasks').onSnapshot(snapshot => {
-    //     const taskFromDb = snapshot.docs.map(doc => { return { id: doc.id, ...doc.data() } });
-    //     this.setState({ tasks: taskFromDb });
-    //   });
-
     componentDidMount = async () => {
-        let dataForState = [];
-        this.unsubscribeComments = firestore.doc('uploads/5bRbc5kDPeHssRyeCYVh').onSnapshot(snapshot => {
-            this.setState({ imageUpload: [...snapshot.data().comments] })
-
-            // snapshot.data().comments.map(async (data) => {
-            //     const ref = await firestore.collection('users');
-            //     try {
-            //         await ref.where('email', '==', data.author).get(snap => {
-            //             snap.docs.map(user => {
-            //                 const profilePic = user.get('photoURL')
-            //                 dataForState.push({ ...data, profilePic });
-            //             });
-            //         })
-
-            //working code
-            // const user = await ref.where('email', '==', data.author).get();
-            // user.docs.map(author => {
-            //     const profilePic = author.get('photoURL');
-            //     const yup = { ...data, profilePic }
-            //     dataForState.push(yup);
-            // })
-        })
+        this.unsubscribeComments = await firestore.collection('uploads').doc('5bRbc5kDPeHssRyeCYVh').collection('comments')
+            .onSnapshot(snapshot => {
+                let dataForState = [];
+                snapshot.docs.forEach((item) => {
+                    dataForState.push({ id: item.id, ...item.data() })
+                })
+                dataForState.sort((a, b) => (a.createdAt > b.createdAt) ? 1 : -1);
+                this.setState({
+                    imageUpload: [...dataForState]
+                }
+                )
+            })
     }
-
-
 
 
     componentWillUnmount = () => {
@@ -68,7 +67,7 @@ class Insta extends React.Component {
 
     render() {
         const { currentUser } = this.props;
-        const { comment, imageUpload } = this.state;
+        const { comment, imageUpload, isEdit } = this.state;
         return (
             <div className="insta" >
                 <div className="image">
@@ -80,7 +79,11 @@ class Insta extends React.Component {
                     <div className="all-comments">
                         {
                             imageUpload !== null ?
-                                imageUpload.map(item => <CommentItem item={item} key={item.id} ></CommentItem>) : ''
+                                imageUpload.map(item => <CommentItem item={item}
+                                    handleDelete={this.deleteComment}
+                                    handleEdit={this.editComment}
+                                    key={item.id}
+                                    currentUser={currentUser} ></CommentItem>) : ''
                         }
                     </div>
 
@@ -92,8 +95,11 @@ class Insta extends React.Component {
                                     name='comment'
                                     placeholder='Comment'
                                     value={comment}
-                                    onChange={this.handleChange} />
-                                <span onClick={() => this.createComment()}>POST</span>
+                                    onChange={this.handleChange}
+                                />
+                                <span onClick={() => this.createComment()}>
+                                    {isEdit ? 'UPDATE' : 'POST'}
+                                </span>
                             </div>) : ''
                     }
 

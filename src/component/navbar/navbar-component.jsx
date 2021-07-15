@@ -2,26 +2,30 @@ import React from 'react'
 import './navbar.style.scss';
 import LoginWithGoogle from '../login/login.component'
 import { auth } from '../../firebase-util';
+import Logo from '../../logo.png';
 
 
 
 const Navbar = ({ currentUser }) => (
 
     <div className="navbar">
-        <div className="navbar-item">
-            <div className="navbar__logo">
-                <span>Firebase with React</span>
+
+
+        <div className="content-btn">
+
+            <div className="logo">
+                <img src={Logo} alt="" />
             </div>
-            <div className="content-btn">
-                {
-                    currentUser ?
-                        <div className='signout' onClick={() => auth.signOut()} >
-                            <h4 >Signout</h4>
-                        </div> :
-                        <LoginWithGoogle />
-                }
-            </div>
+
+            {
+                currentUser ?
+                    <div className='signout' onClick={() => auth.signOut()} >
+                        <h4 >Logout</h4>
+                    </div> :
+                    <LoginWithGoogle />
+            }
         </div>
+
 
     </div>
 

@@ -4,11 +4,6 @@ import Logo from '../../google.png'
 import { signInWithGoogle } from '../../firebase-util.js'
 
 class LoginWithGoogle extends React.Component {
-    constructor(props) {
-        super(props);
-
-    }
-
     render() {
         return (
             <div className="google">
